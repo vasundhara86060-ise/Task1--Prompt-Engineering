@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CopyLocal AI – Website Copy Generator for Local Businesses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0d0d0d;
+      --cream: #f5f0e8;
+      --gold: #f0c040;
+      --amber: #e08020;
+      --rust: #c03020;
+      --sage: #3a6b50;
+      --sky: #2060c0;
+      --mist: #dde8f5;
+      --card-bg: #fffdf7;
+      --radius: 18px;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999; opacity: .35;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 5%;
+      background: rgba(245,240,232,0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 2px solid var(--ink);
+    }
+    .nav-logo {
+      font-family: var(--font-head);
+      font-weight: 800; font-size: 1.25rem;
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--amber); }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      font-weight: 500; font-size: .9rem; text-decoration: none; color: var(--ink);
+      letter-spacing: 0.3px; transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--amber); }
+    .nav-cta {
+      background: var(--ink); color: var(--cream);
+      border: none; border-radius: 50px; padding: 10px 22px;
+      font-family: var(--font-body); font-weight: 500; font-size: .9rem;
+      cursor: pointer; transition: background .2s, transform .15s;
+    }
+    .nav-cta:hover { background: var(--amber); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 140px 5% 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--gold); color: var(--ink);
+      border: 2px solid var(--ink); border-radius: 50px;
+      padding: 6px 18px; font-weight: 600; font-size: .8rem;
+      letter-spacing: 1px; text-transform: uppercase;
+      margin-bottom: 32px;
+      animation: fadeUp .7s ease both;
+    }
+    .hero-badge::before { content: '✦'; font-size: .7rem; }
+    .hero h1 {
+      font-family: var(--font-head);
+      font-size: clamp(2.6rem, 7vw, 6rem);
+      font-weight: 800; line-height: 1.05;
+      letter-spacing: -2px;
+      max-width: 900px;
+      animation: fadeUp .7s .1s ease both;
+    }
+    .hero h1 em { font-style: normal; color: var(--amber); }
+    .hero-sub {
+      max-width: 600px; margin: 24px auto 40px;
+      font-size: 1.1rem; line-height: 1.7; color: #444;
+      animation: fadeUp .7s .2s ease both;
+    }
+    .hero-actions {
+      display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp .7s .3s ease both;
+    }
+    .btn-primary {
+      background: var(--ink); color: var(--cream);
+      border: 2px solid var(--ink); border-radius: 50px;
+      padding: 14px 32px; font-size: 1rem; font-weight: 600;
+      font-family: var(--font-body); cursor: pointer;
+      transition: all .2s; text-decoration: none; display: inline-block;
+    }
+    .btn-primary:hover { background: var(--amber); border-color: var(--amber); transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent; color: var(--ink);
+      border: 2px solid var(--ink); border-radius: 50px;
+      padding: 14px 32px; font-size: 1rem; font-weight: 600;
+      font-family: var(--font-body); cursor: pointer;
+      transition: all .2s; text-decoration: none; display: inline-block;
+    }
+    .btn-outline:hover { background: var(--ink); color: var(--cream); transform: translateY(-2px); }
+
+    /* Decorative blobs */
+    .blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(70px); pointer-events: none; opacity: .18;
+    }
+    .blob-1 { width: 500px; height: 500px; background: var(--gold); top: -150px; right: -100px; }
+    .blob-2 { width: 400px; height: 400px; background: var(--sky); bottom: -100px; left: -80px; }
+
+    /* Scrolling ticker */
+    .ticker-wrap {
+      background: var(--ink); color: var(--cream);
+      border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink);
+      overflow: hidden; padding: 14px 0;
+    }
+    .ticker {
+      display: flex; gap: 60px;
+      animation: ticker 22s linear infinite;
+      white-space: nowrap;
+    }
+    .ticker span {
+      font-family: var(--font-head); font-weight: 700; font-size: .9rem;
+      letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0;
+    }
+    .ticker span.dot { color: var(--gold); }
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── SECTION LAYOUT ── */
+    section { padding: 100px 5%; }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-weight: 600; font-size: .75rem; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--amber);
+      margin-bottom: 16px;
+    }
+    .section-label::before { content: ''; display: block; width: 28px; height: 2px; background: var(--amber); }
+    h2 {
+      font-family: var(--font-head); font-weight: 800;
+      font-size: clamp(1.8rem, 4vw, 3.2rem);
+      line-height: 1.1; letter-spacing: -1px;
+    }
+
+    /* ── FEATURES ── */
+    .features { background: var(--card-bg); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px; margin-top: 56px;
+    }
+    .feature-card {
+      background: var(--cream); border: 2px solid var(--ink); border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: transform .25s, box-shadow .25s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: var(--gold);
+    }
+    .feature-card:hover { transform: translateY(-6px); box-shadow: 6px 8px 0 var(--ink); }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: var(--gold); border: 2px solid var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 20px;
+    }
+    .feature-card h3 {
+      font-family: var(--font-head); font-weight: 700; font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+    .feature-card p { font-size: .92rem; line-height: 1.65; color: #555; }
+
+    /* ── GENERATOR (AI Tool) ── */
+    .generator { background: var(--ink); color: var(--cream); border-radius: 0; }
+    .generator h2 { color: var(--cream); }
+    .generator h2 em { color: var(--gold); font-style: normal; }
+    .gen-wrapper {
+      display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px;
+      margin-top: 52px; align-items: start;
+    }
+    .gen-form {
+      background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.14);
+      border-radius: var(--radius); padding: 32px;
+    }
+    .gen-form label {
+      display: block; font-size: .8rem; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+      color: var(--gold);
+    }
+    .gen-form input, .gen-form select, .gen-form textarea {
+      width: 100%; background: rgba(255,255,255,.08);
+      border: 1.5px solid rgba(255,255,255,.18); border-radius: 10px;
+      padding: 12px 14px; color: var(--cream);
+      font-family: var(--font-body); font-size: .95rem;
+      margin-bottom: 20px; outline: none;
+      transition: border-color .2s;
+    }
+    .gen-form input::placeholder, .gen-form textarea::placeholder { color: rgba(255,255,255,.35); }
+    .gen-form input:focus, .gen-form select:focus, .gen-form textarea:focus { border-color: var(--gold); }
+    .gen-form select option { background: #1a1a1a; color: var(--cream); }
+    .gen-form textarea { resize: vertical; min-height: 90px; }
+    .gen-btn {
+      width: 100%; background: var(--gold); color: var(--ink);
+      border: 2px solid var(--gold); border-radius: 50px;
+      padding: 14px; font-size: 1rem; font-weight: 700;
+      font-family: var(--font-head); cursor: pointer;
+      transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .gen-btn:hover { background: var(--amber); border-color: var(--amber); }
+    .gen-btn .spin { display: none; animation: spin .7s linear infinite; }
+    .gen-btn.loading .spin { display: inline-block; }
+    .gen-btn.loading .btn-text { opacity: .6; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .gen-output {
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .output-card {
+      background: rgba(255,255,255,.05); border: 1.5px solid rgba(255,255,255,.12);
+      border-radius: var(--radius); padding: 24px; position: relative;
+      min-height: 120px;
+    }
+    .output-card-label {
+      font-size: .7rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .output-card-label::before {
+      content: ''; display: block; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--gold);
+    }
+    .output-card-content {
+      font-size: .95rem; line-height: 1.7; color: rgba(255,255,255,.85);
+      white-space: pre-wrap;
+    }
+    .copy-btn {
+      position: absolute; top: 16px; right: 16px;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2);
+      border-radius: 8px; padding: 6px 12px; color: var(--cream);
+      font-size: .75rem; cursor: pointer; transition: background .2s;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,.18); }
+    .placeholder-msg {
+      display: flex; align-items: center; justify-content: center;
+      height: 100%; color: rgba(255,255,255,.3);
+      font-size: .9rem; font-style: italic;
+      text-align: center; padding: 20px 0;
+    }
+
+    /* ── SERVICES ── */
+    .services h2 em { color: var(--amber); font-style: normal; }
+    .services-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px; margin-top: 56px;
+    }
+    .service-card {
+      border: 2px solid var(--ink); border-radius: var(--radius);
+      padding: 36px 28px; position: relative;
+      overflow: hidden; background: var(--card-bg);
+      transition: transform .25s, box-shadow .25s;
+    }
+    .service-card:hover { transform: translateY(-6px); box-shadow: 6px 8px 0 var(--ink); }
+    .service-num {
+      position: absolute; top: 24px; right: 24px;
+      font-family: var(--font-head); font-weight: 800; font-size: 3rem;
+      color: var(--gold); line-height: 1; opacity: .4;
+    }
+    .service-tag {
+      display: inline-block; background: var(--mist); border: 1px solid var(--sky);
+      border-radius: 50px; padding: 4px 14px;
+      font-size: .72rem; font-weight: 600; color: var(--sky);
+      letter-spacing: .5px; margin-bottom: 16px;
+    }
+    .service-card h3 {
+      font-family: var(--font-head); font-weight: 700; font-size: 1.25rem;
+      margin-bottom: 12px;
+    }
+    .service-card p { font-size: .92rem; line-height: 1.65; color: #555; margin-bottom: 20px; }
+    .service-list { list-style: none; }
+    .service-list li {
+      font-size: .88rem; padding: 6px 0;
+      border-bottom: 1px solid rgba(0,0,0,.07);
+      display: flex; align-items: center; gap: 8px; color: #444;
+    }
+    .service-list li::before { content: '✓'; color: var(--sage); font-weight: 700; }
+
+    /* ── HOW IT WORKS ── */
+    .how { background: var(--mist); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+    .steps {
+      display: flex; gap: 0; margin-top: 56px;
+      position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute; top: 36px; left: 10%; right: 10%;
+      height: 2px; background: var(--ink); z-index: 0;
+    }
+    .step {
+      flex: 1; text-align: center; padding: 0 16px; position: relative; z-index: 1;
+    }
+    .step-num {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--gold); border: 3px solid var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-head); font-weight: 800; font-size: 1.4rem;
+      margin: 0 auto 20px; position: relative;
+      transition: transform .3s;
+    }
+    .step:hover .step-num { transform: scale(1.1); }
+    .step h4 {
+      font-family: var(--font-head); font-weight: 700; font-size: 1rem;
+      margin-bottom: 8px;
+    }
+    .step p { font-size: .85rem; color: #555; line-height: 1.55; }
+
+    /* ── BUSINESS TYPES ── */
+    .business-types h2 em { color: var(--amber); font-style: normal; }
+    .biz-scroll {
+      display: flex; gap: 16px; margin-top: 48px;
+      overflow-x: auto; padding-bottom: 12px;
+      scrollbar-width: thin; scrollbar-color: var(--ink) transparent;
+    }
+    .biz-chip {
+      flex-shrink: 0; background: var(--cream);
+      border: 2px solid var(--ink); border-radius: 50px;
+      padding: 10px 24px; cursor: pointer;
+      font-weight: 600; font-size: .9rem;
+      transition: all .2s; white-space: nowrap;
+    }
+    .biz-chip:hover, .biz-chip.active {
+      background: var(--ink); color: var(--cream);
+    }
+    .biz-preview {
+      margin-top: 32px; background: var(--card-bg);
+      border: 2px solid var(--ink); border-radius: var(--radius);
+      padding: 40px; min-height: 200px;
+      animation: fadeIn .4s ease;
+    }
+    .biz-preview h3 {
+      font-family: var(--font-head); font-weight: 800;
+      font-size: 1.6rem; margin-bottom: 10px;
+    }
+    .biz-preview h3 em { color: var(--amber); font-style: normal; }
+    .biz-preview p { color: #555; line-height: 1.7; max-width: 700px; }
+    .biz-preview .cta-preview {
+      margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;
+    }
+    .cta-preview a {
+      background: var(--ink); color: var(--cream);
+      padding: 10px 24px; border-radius: 50px;
+      font-weight: 600; font-size: .88rem; text-decoration: none;
+      transition: background .2s;
+    }
+    .cta-preview a:hover { background: var(--amber); }
+    .cta-preview a.secondary {
+      background: transparent; color: var(--ink);
+      border: 2px solid var(--ink);
+    }
+    .cta-preview a.secondary:hover { background: var(--ink); color: var(--cream); }
+
+    /* ── CTA SECTION ── */
+    .cta-section {
+      background: var(--ink); color: var(--cream);
+      text-align: center; padding: 100px 5%;
+    }
+    .cta-section h2 {
+      color: var(--cream);
+      font-size: clamp(2rem, 5vw, 4rem);
+    }
+    .cta-section h2 em { color: var(--gold); font-style: normal; }
+    .cta-section p { color: rgba(255,255,255,.65); max-width: 550px; margin: 20px auto 40px; line-height: 1.7; }
+    .cta-cards {
+      display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-top: 60px;
+    }
+    .cta-card {
+      background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.14);
+      border-radius: var(--radius); padding: 32px 28px; text-align: left;
+      width: 260px; transition: border-color .2s, transform .2s;
+    }
+    .cta-card:hover { border-color: var(--gold); transform: translateY(-4px); }
+    .cta-card-icon { font-size: 2rem; margin-bottom: 16px; }
+    .cta-card h4 {
+      font-family: var(--font-head); font-weight: 700; font-size: 1rem;
+      color: var(--cream); margin-bottom: 8px;
+    }
+    .cta-card p { font-size: .85rem; color: rgba(255,255,255,.5); line-height: 1.6; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #080808; color: rgba(255,255,255,.45);
+      padding: 48px 5% 32px;
+      border-top: 2px solid rgba(255,255,255,.08);
+    }
+    .footer-inner {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 20px;
+    }
+    .footer-logo { font-family: var(--font-head); font-weight: 800; font-size: 1.1rem; color: var(--cream); }
+    .footer-logo span { color: var(--amber); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { color: rgba(255,255,255,.4); text-decoration: none; font-size: .85rem; transition: color .2s; }
+    .footer-links a:hover { color: var(--gold); }
+    .footer-copy { width: 100%; text-align: center; margin-top: 32px; font-size: .8rem; border-top: 1px solid rgba(255,255,255,.06); padding-top: 24px; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity .65s ease, transform .65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width: 900px) {
+      .gen-wrapper { grid-template-columns: 1fr; }
+      .steps { flex-direction: column; gap: 32px; }
+      .steps::before { display: none; }
+      .step-num { margin-bottom: 14px; }
+      nav .nav-links { display: none; }
+    }
+    @media(max-width: 600px) {
+      .hero h1 { font-size: 2.2rem; }
+      section { padding: 72px 5%; }
+    }
+
+    /* Notification toast */
+    .toast {
+      position: fixed; bottom: 30px; right: 30px;
+      background: var(--sage); color: #fff;
+      border-radius: 10px; padding: 12px 22px;
+      font-weight: 600; font-size: .9rem;
+      opacity: 0; transform: translateY(20px);
+      transition: all .3s; z-index: 9998;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Copy<span>Local</span> AI</div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#generator">Generator</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#how">How It Works</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('generator').scrollIntoView({behavior:'smooth'})">Try Free →</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="hero-badge">Task 1 · AI-Powered Website Copy</div>
+  <h1>Website Copy That<br/>Converts — <em>Instantly.</em></h1>
+  <p class="hero-sub">Generate professional, persuasive website copy tailored to your local business in seconds. No copywriter needed.</p>
+  <div class="hero-actions">
+    <a href="#generator" class="btn-primary">Generate My Copy ↓</a>
+    <a href="#services" class="btn-outline">See What We Do</a>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker">
+    <span>Salons</span><span class="dot">✦</span>
+    <span>Cafés</span><span class="dot">✦</span>
+    <span>Clinics</span><span class="dot">✦</span>
+    <span>Agencies</span><span class="dot">✦</span>
+    <span>Restaurants</span><span class="dot">✦</span>
+    <span>Boutiques</span><span class="dot">✦</span>
+    <span>Gyms</span><span class="dot">✦</span>
+    <span>Tutors</span><span class="dot">✦</span>
+    <span>Plumbers</span><span class="dot">✦</span>
+    <span>Law Firms</span><span class="dot">✦</span>
+    <span>Salons</span><span class="dot">✦</span>
+    <span>Cafés</span><span class="dot">✦</span>
+    <span>Clinics</span><span class="dot">✦</span>
+    <span>Agencies</span><span class="dot">✦</span>
+    <span>Restaurants</span><span class="dot">✦</span>
+    <span>Boutiques</span><span class="dot">✦</span>
+    <span>Gyms</span><span class="dot">✦</span>
+    <span>Tutors</span><span class="dot">✦</span>
+    <span>Plumbers</span><span class="dot">✦</span>
+    <span>Law Firms</span><span class="dot">✦</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-label reveal">Key Features</div>
+  <h2 class="reveal">Everything your website<br/>copy needs — covered.</h2>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon">🎯</div>
+      <h3>Clear Value Proposition</h3>
+      <p>Generate homepage copy with a punchy headline, sub-headline, and opening statement that instantly communicates why customers should choose you.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🛍️</div>
+      <h3>Service Page Descriptions</h3>
+      <p>Tailored descriptions for every service you offer — written to match your business type, tone, and local audience expectations.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">📣</div>
+      <h3>Strong CTA Sections</h3>
+      <p>Conversion-focused call-to-action content for contact forms, booking pages, and enquiry buttons that actually get clicked.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🎨</div>
+      <h3>Tone Adaptation</h3>
+      <p>Automatically adapts the writing tone — friendly for cafés, professional for clinics, energetic for gyms — to fit your brand personality.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">✅</div>
+      <h3>Persuasive & Website-Ready</h3>
+      <p>Every output is formatted, proofread, and immediately ready to paste into your website builder — no editing needed.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">⚡</div>
+      <h3>AI-Powered Workflows</h3>
+      <p>Built with structured prompt engineering for consistent, high-quality output — not generic filler, but copy that sounds like a human wrote it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- GENERATOR -->
+<section class="generator" id="generator">
+  <div class="section-label" style="color: var(--gold);">AI Copy Generator</div>
+  <h2>Generate your website copy <em>right now.</em></h2>
+  <div class="gen-wrapper">
+    <!-- FORM -->
+    <div class="gen-form">
+      <label>Business Name</label>
+      <input type="text" id="biz-name" placeholder="e.g. Bella's Hair Studio" />
+
+      <label>Business Type</label>
+      <select id="biz-type">
+        <option value="">Select your business type...</option>
+        <option value="salon">Hair Salon / Beauty Parlour</option>
+        <option value="cafe">Café / Coffee Shop</option>
+        <option value="clinic">Medical Clinic / Dental</option>
+        <option value="gym">Gym / Fitness Studio</option>
+        <option value="restaurant">Restaurant / Eatery</option>
+        <option value="agency">Marketing / Design Agency</option>
+        <option value="boutique">Boutique / Fashion Store</option>
+        <option value="tutor">Tutoring / Coaching</option>
+        <option value="law">Law Firm</option>
+        <option value="plumber">Plumber / Electrician</option>
+      </select>
+
+      <label>Location / City</label>
+      <input type="text" id="biz-location" placeholder="e.g. Bengaluru, Karnataka" />
+
+      <label>Key Services (comma-separated)</label>
+      <textarea id="biz-services" placeholder="e.g. Haircuts, Blowouts, Bridal Styling, Keratin Treatments"></textarea>
+
+      <label>Tone Preference</label>
+      <select id="biz-tone">
+        <option value="friendly">Friendly & Warm</option>
+        <option value="professional">Professional & Trustworthy</option>
+        <option value="energetic">Energetic & Bold</option>
+        <option value="luxury">Luxury & Premium</option>
+        <option value="playful">Playful & Fun</option>
+      </select>
+
+      <button class="gen-btn" id="gen-btn" onclick="generateCopy()">
+        <span class="spin">⟳</span>
+        <span class="btn-text">✦ Generate Website Copy</span>
+      </button>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="gen-output">
+      <div class="output-card" id="out-hero">
+        <div class="output-card-label">Homepage Hero</div>
+        <button class="copy-btn" onclick="copyCard('out-hero')">Copy</button>
+        <div class="output-card-content"><span class="placeholder-msg">Your homepage hero copy will appear here...</span></div>
+      </div>
+      <div class="output-card" id="out-about">
+        <div class="output-card-label">About / Value Proposition</div>
+        <button class="copy-btn" onclick="copyCard('out-about')">Copy</button>
+        <div class="output-card-content"><span class="placeholder-msg">Your about section copy will appear here...</span></div>
+      </div>
+      <div class="output-card" id="out-services">
+        <div class="output-card-label">Services Section</div>
+        <button class="copy-btn" onclick="copyCard('out-services')">Copy</button>
+        <div class="output-card-content"><span class="placeholder-msg">Your services copy will appear here...</span></div>
+      </div>
+      <div class="output-card" id="out-cta">
+        <div class="output-card-label">Call-To-Action</div>
+        <button class="copy-btn" onclick="copyCard('out-cta')">Copy</button>
+        <div class="output-card-content"><span class="placeholder-msg">Your CTA section copy will appear here...</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-label reveal">Our Services</div>
+  <h2 class="reveal">Three pillars of <em>great</em><br/>website copy.</h2>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <div class="service-num">01</div>
+      <div class="service-tag">Homepage</div>
+      <h3>Hero & Value Proposition</h3>
+      <p>The first 5 seconds on your site determine whether visitors stay or leave. We craft headers and openers that hook your ideal customer instantly.</p>
+      <ul class="service-list">
+        <li>Headline + Subheadline</li>
+        <li>Opening Value Statement</li>
+        <li>Trust-building social proof line</li>
+        <li>Above-the-fold CTA</li>
+      </ul>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-num">02</div>
+      <div class="service-tag">Services</div>
+      <h3>Service Page Copy</h3>
+      <p>Each service you offer deserves its own compelling description. We write benefit-led copy that explains what you do and why customers need it.</p>
+      <ul class="service-list">
+        <li>Benefit-focused descriptions</li>
+        <li>Pricing presentation language</li>
+        <li>FAQ-ready content</li>
+        <li>Booking/enquiry micro-copy</li>
+      </ul>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-num">03</div>
+      <div class="service-tag">CTA</div>
+      <h3>Call-To-Action Sections</h3>
+      <p>A great CTA is more than a button. We write entire sections — urgency copy, reassurance text, and the button label — designed to convert browsers to buyers.</p>
+      <ul class="service-list">
+        <li>Contact page copy</li>
+        <li>Booking section content</li>
+        <li>Enquiry form headlines</li>
+        <li>Footer CTA blocks</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="section-label reveal">Process</div>
+  <h2 class="reveal">How it works</h2>
+  <div class="steps">
+    <div class="step reveal">
+      <div class="step-num">1</div>
+      <h4>Enter Your Details</h4>
+      <p>Tell us your business name, type, location, and services in under 60 seconds.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">2</div>
+      <h4>Choose Your Tone</h4>
+      <p>Pick from friendly, professional, energetic, luxury, or playful writing styles.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">3</div>
+      <h4>AI Generates Copy</h4>
+      <p>Our AI produces homepage, services, and CTA copy in seconds using structured prompts.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">4</div>
+      <h4>Copy & Publish</h4>
+      <p>Copy your content, paste it into your website builder, and go live immediately.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BUSINESS TYPES -->
+<section class="business-types">
+  <div class="section-label reveal">Works For</div>
+  <h2 class="reveal">Copy adapted for <em>any</em><br/>local business type.</h2>
+  <div class="biz-scroll">
+    <div class="biz-chip active" onclick="showBiz(this,'salon')">💇 Hair Salon</div>
+    <div class="biz-chip" onclick="showBiz(this,'cafe')">☕ Café</div>
+    <div class="biz-chip" onclick="showBiz(this,'clinic')">🏥 Clinic</div>
+    <div class="biz-chip" onclick="showBiz(this,'gym')">🏋️ Gym</div>
+    <div class="biz-chip" onclick="showBiz(this,'restaurant')">🍽️ Restaurant</div>
+    <div class="biz-chip" onclick="showBiz(this,'agency')">💡 Agency</div>
+    <div class="biz-chip" onclick="showBiz(this,'boutique')">👗 Boutique</div>
+    <div class="biz-chip" onclick="showBiz(this,'tutor')">📚 Tutoring</div>
+  </div>
+  <div class="biz-preview" id="biz-preview">
+    <h3>Welcome to <em>Bella's Hair Studio</em> — Where Every Look Tells a Story.</h3>
+    <p>Bengaluru's most-loved hair salon for over a decade. From everyday cuts to bridal transformations, our expert stylists blend creativity with care to give you the look you've always dreamed of. Walk in. Walk out. Turn heads.</p>
+    <div class="cta-preview">
+      <a href="#">Book Your Appointment</a>
+      <a href="#" class="secondary">View Our Services</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA SECTION -->
+<section class="cta-section" id="contact">
+  <div class="section-label" style="color: var(--gold);">Get Started</div>
+  <h2>Ready to fill your website<br/>with copy that <em>works?</em></h2>
+  <p>Your local business deserves a website that speaks to your community. Generate professional copy in seconds — completely free.</p>
+  <a href="#generator" class="btn-primary" style="display:inline-block; margin-bottom: 16px;">Generate Your Copy Now →</a>
+
+  <div class="cta-cards">
+    <div class="cta-card">
+      <div class="cta-card-icon">🎯</div>
+      <h4>Conversion-First</h4>
+      <p>Every line written to turn visitors into customers, not just readers.</p>
+    </div>
+    <div class="cta-card">
+      <div class="cta-card-icon">⚡</div>
+      <h4>Instant Results</h4>
+      <p>Full website copy set generated in under 30 seconds. No waiting.</p>
+    </div>
+    <div class="cta-card">
+      <div class="cta-card-icon">🏪</div>
+      <h4>Local-First</h4>
+      <p>Copy that speaks to your neighbourhood, your community, your customers.</p>
+    </div>
+    <div class="cta-card">
+      <div class="cta-card-icon">📋</div>
+      <h4>Ready to Publish</h4>
+      <p>No editing required. Paste directly into any website builder and launch.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Copy<span>Local</span> AI</div>
+    <nav class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#generator">Generator</a>
+      <a href="#services">Services</a>
+      <a href="#how">How It Works</a>
+    </nav>
+  </div>
+  <p class="footer-copy">© 2026 CopyLocal AI — AI Website Copy Generator for Local Businesses. Built with ❤️ using HTML, CSS &amp; JavaScript.</p>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✓ Copied to clipboard!</div>
+
+<script>
+  /* ── SCROLL REVEAL ── */
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  /* ── BUSINESS PREVIEW DATA ── */
+  const bizData = {
+    salon: {
+      headline: 'Welcome to <em>Bella\'s Hair Studio</em> — Where Every Look Tells a Story.',
+      body: 'Bengaluru\'s most-loved hair salon for over a decade. From everyday cuts to bridal transformations, our expert stylists blend creativity with care to give you the look you\'ve always dreamed of. Walk in. Walk out. Turn heads.',
+      cta1: 'Book Your Appointment', cta2: 'View Our Services'
+    },
+    cafe: {
+      headline: 'Your Favourite Corner of the City — <em>Brewed Just Right.</em>',
+      body: 'More than a coffee shop — a community. Whether you\'re catching up with a friend, wrapping up a project, or just need five minutes of calm, our café is your home away from home. Artisan coffee. Fresh bakes. Good vibes.',
+      cta1: 'Find Us Today', cta2: 'See Our Menu'
+    },
+    clinic: {
+      headline: 'Your Health. Our Priority. <em>Every Single Day.</em>',
+      body: 'Trusted by thousands of patients across the city, our clinic combines advanced medical expertise with compassionate, patient-first care. Whether it\'s a routine check-up or specialist consultation, we\'re here for you — and your family.',
+      cta1: 'Book an Appointment', cta2: 'Our Specialisations'
+    },
+    gym: {
+      headline: 'Stop Waiting. Start <em>Becoming.</em>',
+      body: 'The gym that trains you like an athlete, no matter where you\'re starting from. Our certified coaches, cutting-edge equipment, and energising community will push you further than you thought possible. Results aren\'t a maybe here — they\'re a guarantee.',
+      cta1: 'Start Free Trial', cta2: 'Explore Memberships'
+    },
+    restaurant: {
+      headline: 'Food Made With Feeling. <em>Every Plate Tells a Story.</em>',
+      body: 'From the first sip to the last bite, dining here is an experience. We source locally, cook seasonally, and serve every dish with the warmth of a home-cooked meal. Because good food isn\'t just about eating — it\'s about belonging.',
+      cta1: 'Reserve a Table', cta2: 'View Our Menu'
+    },
+    agency: {
+      headline: 'We Build Brands That <em>People Remember.</em>',
+      body: 'Strategy. Design. Growth. We\'re the creative agency local businesses trust to look world-class and perform even better. From your logo to your digital presence, we bring bold ideas and proven processes to every project.',
+      cta1: 'Start a Project', cta2: 'See Our Work'
+    },
+    boutique: {
+      headline: 'Fashion That Fits <em>Your Story.</em>',
+      body: 'Curated collections for the woman who knows what she wants. Our boutique brings together emerging designers and timeless staples so every outfit feels intentional. Come in and discover something that was made for you.',
+      cta1: 'Shop Now', cta2: 'Book a Styling Session'
+    },
+    tutor: {
+      headline: 'Unlock Your Potential. <em>One Session at a Time.</em>',
+      body: 'Learning looks different for everyone. Our experienced tutors meet students where they are, build confidence, and deliver real academic results. Whether it\'s exam prep or subject mastery — we make every session count.',
+      cta1: 'Book a Free Session', cta2: 'Browse Subjects'
+    }
+  };
+
+  function showBiz(el, type) {
+    document.querySelectorAll('.biz-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    const d = bizData[type];
+    const preview = document.getElementById('biz-preview');
+    preview.innerHTML = `
+      <h3>${d.headline}</h3>
+      <p>${d.body}</p>
+      <div class="cta-preview">
+        <a href="#">${d.cta1}</a>
+        <a href="#" class="secondary">${d.cta2}</a>
+      </div>`;
+  }
+
+  /* ── COPY FUNCTION ── */
+  function copyCard(id) {
+    const content = document.querySelector(`#${id} .output-card-content`).innerText;
+    if(content.includes('will appear here')) return;
+    navigator.clipboard.writeText(content).then(() => showToast());
+  }
+
+  function showToast() {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  /* ── GENERATE COPY (AI via Anthropic API) ── */
+  async function generateCopy() {
+    const name = document.getElementById('biz-name').value.trim();
+    const type = document.getElementById('biz-type').value;
+    const location = document.getElementById('biz-location').value.trim();
+    const services = document.getElementById('biz-services').value.trim();
+    const tone = document.getElementById('biz-tone').value;
+
+    if (!name || !type || !location || !services) {
+      alert('Please fill in all fields before generating.');
+      return;
+    }
+
+    const btn = document.getElementById('gen-btn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    // Clear outputs
+    ['out-hero','out-about','out-services','out-cta'].forEach(id => {
+      document.querySelector(`#${id} .output-card-content`).innerHTML =
+        '<span class="placeholder-msg">Generating...</span>';
+    });
+
+    const toneMap = {
+      friendly: 'warm, approachable, and conversational',
+      professional: 'professional, authoritative, and trustworthy',
+      energetic: 'energetic, bold, and motivating',
+      luxury: 'luxurious, refined, and exclusive',
+      playful: 'playful, fun, and light-hearted'
+    };
+
+    const prompt = `You are an expert website copywriter for local businesses. Generate complete, conversion-focused website copy for the following business.
+
+Business Name: ${name}
+Business Type: ${type}
+Location: ${location}
+Services: ${services}
+Tone: ${toneMap[tone]}
+
+Generate the following 4 sections. Return ONLY valid JSON, no markdown fences.
+
+{
+  "hero": "2–3 sentence homepage hero copy with a compelling headline (prefix with HEADLINE: on the first line) and a supporting sub-headline.",
+  "about": "3–4 sentence about/value proposition section that explains what makes this business special and builds trust.",
+  "services": "Service descriptions for each service listed. Format each as 'Service Name: 2 sentence description.' separated by newlines.",
+  "cta": "A complete call-to-action section including a headline (prefix with HEADLINE:), 2 supporting sentences, and a button label (prefix with BUTTON:)."
+}`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      const data = await res.json();
+      const raw = data.content.map(b => b.text || '').join('');
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+
+      document.querySelector('#out-hero .output-card-content').innerText = parsed.hero || '—';
+      document.querySelector('#out-about .output-card-content').innerText = parsed.about || '—';
+      document.querySelector('#out-services .output-card-content').innerText = parsed.services || '—';
+      document.querySelector('#out-cta .output-card-content').innerText = parsed.cta || '—';
+
+    } catch(err) {
+      // Fallback: generate locally if API not available
+      const fallback = generateFallback(name, type, location, services, tone);
+      document.querySelector('#out-hero .output-card-content').innerText = fallback.hero;
+      document.querySelector('#out-about .output-card-content').innerText = fallback.about;
+      document.querySelector('#out-services .output-card-content').innerText = fallback.services;
+      document.querySelector('#out-cta .output-card-content').innerText = fallback.cta;
+    }
+
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+
+  function generateFallback(name, type, location, services, tone) {
+    const toneAdj = { friendly:'trusted', professional:'leading', energetic:'top', luxury:'premium', playful:'beloved' }[tone] || 'trusted';
+    const svcList = services.split(',').map(s => s.trim()).filter(Boolean);
+    return {
+      hero: `HEADLINE: ${name} — ${location}'s ${toneAdj} ${type}.\n\nWelcome to a place where quality meets passion. At ${name}, we believe every customer deserves an exceptional experience — and we deliver it, every single time.`,
+      about: `${name} has been serving the ${location} community with pride and dedication. We are a ${type} built on the values of quality, trust, and genuine care for our customers. Our team of experienced professionals is committed to exceeding your expectations on every visit. When you choose us, you're not just a customer — you're part of our community.`,
+      services: svcList.map(s => `${s}: Experience world-class ${s.toLowerCase()} delivered by our skilled team in ${location}. We use only the finest techniques and products to ensure outstanding results every time.`).join('\n\n'),
+      cta: `HEADLINE: Ready to experience ${name} for yourself?\n\nDon't settle for less than the best. Book your visit today and discover why ${location} chooses us again and again.\n\nBUTTON: Book Your Appointment Now`
+    };
+  }
+</script>
+</body>
+</html>
